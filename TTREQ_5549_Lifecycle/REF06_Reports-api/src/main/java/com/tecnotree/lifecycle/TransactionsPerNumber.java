@@ -263,6 +263,13 @@ public class TransactionsPerNumber {
   		ftp_pass = prop.getProperty("ftp1.pass");
   		ftp_path = prop.getProperty("ftp1.path");
   		ftp_sftp = Boolean.parseBoolean(prop.getProperty("ftp1.sftp"));
+  		
+  		ftp2_ip = prop.getProperty("ftp2.ip");
+  		ftp2_port = prop.getProperty("ftp2.port");
+  		ftp2_user = prop.getProperty("ftp2.user");
+  		ftp2_pass = prop.getProperty("ftp2.pass");
+  		ftp2_path = prop.getProperty("ftp2.path");
+  		ftp2_sftp = Boolean.parseBoolean(prop.getProperty("ftp2.sftp"));
   				
 	}
 	
@@ -444,6 +451,9 @@ public class TransactionsPerNumber {
 			//ENVIO ARCHIVO DE SALIDA VIA FTP AL 1ER. SERVIDOR
 			sendFtp(ftp_ip, ftp_port, ftp_user, ftp_pass, ftp_sftp, ftp_path, file_name, fichero.getAbsolutePath());
 			
+			//ENVIO ARCHIVO DE SALIDA VIA SFTP AL 2DO. SERVIDOR
+			sendFtp(ftp2_ip, ftp2_port, ftp2_user, ftp2_pass, ftp2_sftp, ftp2_path, file_name, fichero.getAbsolutePath());
+			
 		}
 		
 		System.out.println(dateFormat.format(new Date()) + " - Finished Transactions per Number Report.");
@@ -509,7 +519,7 @@ public class TransactionsPerNumber {
 			logger.info("Sending file " + gzipfileName + " via FTP to " + ftp_ip + ":" + ftp_port + "...");	
 				
 	      	infoFtp = new String[] {ftp_ip,ftp_port,ftp_user,ftp_pass,gzipfileName};
-	      	if (Tn3FTP.uploadd(infoFtp)) {
+	      	if (Tn3FTP.upload(infoFtp, ftp_path)) {
 	      		System.out.println(dateFormat.format(new Date()) + " - The file " + gzipfileName + " sent via FTP correctly.");
 	      		logger.info("The file " + gzipfileName + " sent via FTP correctly.");
 	      	}else{

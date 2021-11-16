@@ -40,7 +40,8 @@ public class DumpFrozenBalances {
 	private static String file_name = "", file_ext = "", file_timeZone = "", file_separator = "", file_outputDirectory = "";
 	private static String log_outputDirectory = "";
 	private static String ftp_ip = "", ftp_port = "", ftp_user = "", ftp_pass = "", ftp_path = "";
-	private static boolean ftp_sftp = false;
+	private static String ftp2_ip = "", ftp2_port = "", ftp2_user = "", ftp2_pass = "", ftp2_path = "";
+	private static boolean ftp_sftp = false, ftp2_sftp = false;
 	private static String[] infoFtp = null;
 	private static GZIPOutputStream outGzip = null;
 		
@@ -106,12 +107,19 @@ public class DumpFrozenBalances {
   		log_outputDirectory = prop.getProperty("log.outputDirectory");
   		
   		//PROPIEDADES DE FTP/SFTP
-  		ftp_ip = prop.getProperty("ftp.ip");
-  		ftp_port = prop.getProperty("ftp.port");
-  		ftp_user = prop.getProperty("ftp.user");
-  		ftp_pass = prop.getProperty("ftp.pass");
-  		ftp_path = prop.getProperty("ftp.path");
-  		ftp_sftp = Boolean.parseBoolean(prop.getProperty("ftp.sftp"));
+  		ftp_ip = prop.getProperty("ftp1.ip");
+  		ftp_port = prop.getProperty("ftp1.port");
+  		ftp_user = prop.getProperty("ftp1.user");
+  		ftp_pass = prop.getProperty("ftp1.pass");
+  		ftp_path = prop.getProperty("ftp1.path");
+  		ftp_sftp = Boolean.parseBoolean(prop.getProperty("ftp1.sftp"));
+  		
+  		ftp2_ip = prop.getProperty("ftp2.ip");
+  		ftp2_port = prop.getProperty("ftp2.port");
+  		ftp2_user = prop.getProperty("ftp2.user");
+  		ftp2_pass = prop.getProperty("ftp2.pass");
+  		ftp2_path = prop.getProperty("ftp2.path");
+  		ftp2_sftp = Boolean.parseBoolean(prop.getProperty("ftp2.sftp"));
 		
 	}
 	
@@ -182,8 +190,11 @@ public class DumpFrozenBalances {
 		//GENERO EL ARCHIVO ZIP  
 		if(gzipFile(fichero)) {
 			
-			//ENVIO ARCHIVO DE SALIDA VIA FTP
-			sendFtp(ftp_path, file_name,fichero.getAbsolutePath());
+			//ENVIO ARCHIVO DE SALIDA VIA FTP AL 1ER. SERVIDOR
+			sendFtp(ftp_ip, ftp_port, ftp_user, ftp_pass, ftp_sftp, ftp_path, file_name, fichero.getAbsolutePath());
+			
+			//ENVIO ARCHIVO DE SALIDA VIA SFTP AL 2DO. SERVIDOR
+			sendFtp(ftp2_ip, ftp2_port, ftp2_user, ftp2_pass, ftp2_sftp, ftp2_path, file_name, fichero.getAbsolutePath());
 		}
 		
 		System.out.println(dateFormat.format(new Date()) + " - Finished Frozen Balances Report.");
@@ -222,8 +233,8 @@ public class DumpFrozenBalances {
 	 * 
 	 * @param absolutePathFile
 	 */
-	private static void sendFtp(String ftp_path, String file_name, String absolutePathFile) {
-		
+	private static void sendFtp(String ftp_ip, String ftp_port, String ftp_user, String ftp_pass, boolean ftp_sftp, String ftp_path, String file_name, String absolutePathFile) {
+			
 		String gzipfileName = absolutePathFile+".gz";
 		String fileName = file_name + ".gz";
 		if (ftp_sftp) {	
@@ -249,7 +260,7 @@ public class DumpFrozenBalances {
 			logger.info("Sending file " + gzipfileName + " via FTP to directory " + ftp_path + " of server " + ftp_ip + ":" + ftp_port + "...");	
 			
 	      	infoFtp = new String[] {ftp_ip,ftp_port,ftp_user,ftp_pass,gzipfileName};
-	      	if (Tn3FTP.uploadd(infoFtp)) {
+	      	if (Tn3FTP.upload(infoFtp, ftp_path)) {
 	      		System.out.println(dateFormat.format(new Date()) + " - The file " + gzipfileName + " sent via FTP correctly.");
 	      		logger.info("The file " + gzipfileName + " sent via FTP correctly.");
 	      	}else{

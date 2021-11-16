@@ -380,7 +380,7 @@ public class FrozenBalancesPerHour {
 			//ENVIO ARCHIVO DE SALIDA VIA FTP AL 1ER. SERVIDOR
 			sendFtp(ftp_ip, ftp_port, ftp_user, ftp_pass, ftp_sftp, ftp_path, file_name, fichero.getAbsolutePath());
 			
-			//ENVIO ARCHIVO DE SALIDA VIA FTP AL 2DO. SERVIDOR
+			//ENVIO ARCHIVO DE SALIDA VIA SFTP AL 2DO. SERVIDOR
 			sendFtp(ftp2_ip, ftp2_port, ftp2_user, ftp2_pass, ftp2_sftp, ftp2_path, file_name, fichero.getAbsolutePath());
 		}
 		
@@ -447,7 +447,7 @@ public class FrozenBalancesPerHour {
 			logger.info("Sending file " + gzipfileName + " via FTP to " + ftp_ip + ":" + ftp_port + "...");	
 				
 	      	infoFtp = new String[] {ftp_ip,ftp_port,ftp_user,ftp_pass,gzipfileName};
-	      	if (Tn3FTP.uploadd(infoFtp)) {
+	      	if (Tn3FTP.upload(infoFtp, ftp_path)) {
 	      		System.out.println(dateFormat.format(new Date()) + " - The file " + gzipfileName + " sent via FTP correctly.");
 	      		logger.info("The file " + gzipfileName + " sent via FTP correctly.");
 	      	}else{
