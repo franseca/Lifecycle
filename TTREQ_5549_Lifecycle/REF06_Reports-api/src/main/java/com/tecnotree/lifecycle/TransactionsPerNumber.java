@@ -334,6 +334,7 @@ public class TransactionsPerNumber {
 					+ "FROM CDV_RECORDS\r\n"
 					+ "WHERE CDV_RECORDS.LAST = 1\r\n"
 					+ "AND DATE_FORMAT(CDV_RECORDS.CREATION_DATE,\"%Y-%m-%d\") = '" + date + "'\r\n"
+					+ "AND (CDV_RECORDS.STATUS = 'CONGELADO' OR CDV_RECORDS.STATUS = 'DEVUELTO' OR CDV_RECORDS.STATUS = 'EXPIRADO_CS')\r\n"
 					+ "ORDER BY CDV_RECORDS.CREATION_DATE DESC) A;";
 		}else {
 			
@@ -363,6 +364,7 @@ public class TransactionsPerNumber {
 						+ "FROM CDV_RECORDS\r\n"
 						+ "WHERE CDV_RECORDS.LAST = 1\r\n"
 						+ "AND DATE_FORMAT(CDV_RECORDS.CREATION_DATE,\"%Y-%m-%d\") = '" + date + "'\r\n"
+						+ "AND (CDV_RECORDS.STATUS = 'CONGELADO' OR CDV_RECORDS.STATUS = 'DEVUELTO' OR CDV_RECORDS.STATUS = 'EXPIRADO_CS')\r\n"
 						+ "ORDER BY DATE_FORMAT(CDV_RECORDS.CREATION_DATE,\"%Y-%m-%d %H\") DESC) A;";
 				
 			}else if (dateOption == 2) {//SI SE INGRESO EL PARAMTERO FECHA EN EL FORMATO yyyy-MM
@@ -391,6 +393,7 @@ public class TransactionsPerNumber {
 						+ "FROM CDV_RECORDS\r\n"
 						+ "WHERE CDV_RECORDS.LAST = 1\r\n"
 						+ "AND DATE_FORMAT(CDV_RECORDS.CREATION_DATE,\"%Y-%m\") = '" + date + "'\r\n"
+						+ "AND (CDV_RECORDS.STATUS = 'CONGELADO' OR CDV_RECORDS.STATUS = 'DEVUELTO' OR CDV_RECORDS.STATUS = 'EXPIRADO_CS')\r\n"
 						+ "ORDER BY CDV_RECORDS.CREATION_DATE DESC) A;";
 				
 			}else {// SI SE INGRESO EL PARAMTERO FECHA EN EL FORMATO yyyy
@@ -419,6 +422,7 @@ public class TransactionsPerNumber {
 						+ "FROM CDV_RECORDS\r\n"
 						+ "WHERE CDV_RECORDS.LAST = 1\r\n"
 						+ "AND DATE_FORMAT(CDV_RECORDS.CREATION_DATE,\"%Y\") = '" + date + "'\r\n"
+						+ "AND (CDV_RECORDS.STATUS = 'CONGELADO' OR CDV_RECORDS.STATUS = 'DEVUELTO' OR CDV_RECORDS.STATUS = 'EXPIRADO_CS')\r\n"
 						+ "ORDER BY CDV_RECORDS.CREATION_DATE DESC) A;";
 				
 			}
@@ -467,7 +471,7 @@ public class TransactionsPerNumber {
 	private static void setFileName(String file_zonaHoraria) {
 		Clock clock = Clock.system(ZoneId.of(file_zonaHoraria));
 	  
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd_hhmmss");
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		Date date = new Date(clock.millis());
 		String time = simpleDateFormat.format(date);
 	  

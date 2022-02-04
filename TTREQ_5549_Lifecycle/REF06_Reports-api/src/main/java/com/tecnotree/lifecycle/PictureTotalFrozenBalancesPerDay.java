@@ -12,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Clock;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Properties;
 //import core.Tn3FTP;
@@ -187,7 +189,7 @@ public class PictureTotalFrozenBalancesPerDay {
 		System.out.println(dateFormat.format(new Date()) + " - Getting data to the report...");
 		logger.info("Getting data to the report...");	
 		
-		query = "SELECT CONCAT(DATE_FORMAT(NOW(),\"%Y-%m-%d %H:%i:%s\"),'|', COUNT(*),'|', FORMAT(SUM(IFNULL(CDV_RECORDS.BALANCE_T,0))/1000,3)) RECORD\r\n"
+		query = "SELECT CONCAT(DATE_FORMAT(NOW(),\"%Y-%m-%d %H:%i\"),'|', COUNT(*),'|', FORMAT(SUM(IFNULL(CDV_RECORDS.BALANCE_T,0))/1000,3)) RECORD\r\n"
 				+ "FROM CDV_RECORDS\r\n"
 				+ "WHERE CDV_RECORDS.LAST = 1\r\n"
 				+ "AND CDV_RECORDS.STATUS = 'CONGELADO'\r\n"
@@ -230,7 +232,14 @@ public class PictureTotalFrozenBalancesPerDay {
 	 * @param file_zonaHoraria
 	 */
 	private static void setFileName(String file_zonaHoraria) {
-		file_name = file_name+file_ext;
+		Clock clock = Clock.system(ZoneId.of(file_zonaHoraria));
+		  
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+		Date date = new Date(clock.millis());
+		String time = simpleDateFormat.format(date);
+	  
+		file_name = file_name.replace("yyyyMMdd_hhmmss", time)+file_ext;
+		
 	}
   
 	/**

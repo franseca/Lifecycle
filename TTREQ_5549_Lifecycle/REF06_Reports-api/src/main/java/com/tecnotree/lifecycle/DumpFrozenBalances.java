@@ -157,7 +157,7 @@ public class DumpFrozenBalances {
 		System.out.println(dateFormat.format(new Date()) + " - Getting data to the report...");
 		logger.info("Getting data to the report...");	
 		
-		String query = "SELECT CDV_MAIN.MAIN_ID, CDV_MAIN.MSISDN, CDV_MAIN.STATUS, CDV_MAIN.BALANCE_T, CONCAT(MSISDN,'|',FORMAT(IFNULL(BALANCE_T,0)/1000,3),'|',START_RECHARGE,'|',EXPIRATION_DATE) RECORD\r\n"
+		String query = "SELECT CDV_MAIN.MAIN_ID, CDV_MAIN.MSISDN, CDV_MAIN.STATUS, CDV_MAIN.BALANCE_T, CONCAT(MSISDN,'|',FORMAT(IFNULL(BALANCE_T,0)/1000,3),'|',IFNULL(START_RECHARGE,''),'|',IFNULL(EXPIRATION_DATE,'')) RECORD\r\n"
 						+ "FROM CDV_MAIN,\r\n"
 						+ "     (SELECT MAX(MAIN_ID) MAIN_ID\r\n"
 						+ "      FROM CDV_MAIN TB2 \r\n"
@@ -208,7 +208,7 @@ public class DumpFrozenBalances {
 	private static void setFileName(String file_zonaHoraria) {
 		Clock clock = Clock.system(ZoneId.of(file_zonaHoraria));
 	  
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd_hhmmss");
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		Date date = new Date(clock.millis());
 		String time = simpleDateFormat.format(date);
 	  

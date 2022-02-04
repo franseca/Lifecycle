@@ -395,7 +395,7 @@ public class FrozenBalancesPerHour {
 	private static void setFileName(String file_zonaHoraria) {
 		Clock clock = Clock.system(ZoneId.of(file_zonaHoraria));
 	  
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd_hhmmss");
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
 		Date date = new Date(clock.millis());
 		String time = simpleDateFormat.format(date);
 	  
