@@ -1,2 +1,3 @@
 com\tecnotree\lifecycle\Logs.class
 com\tecnotree\lifecycle\LogElasticSearch.class
+com\tecnotree\lifecycle\json\LogJson.class

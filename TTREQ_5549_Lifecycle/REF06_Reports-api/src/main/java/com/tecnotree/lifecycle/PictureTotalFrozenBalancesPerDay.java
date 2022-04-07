@@ -20,6 +20,10 @@ import java.util.Properties;
 //import core.Tn3SFTP;
 import java.util.zip.GZIPOutputStream;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.tecnotree.lifecycle.json.LogJson;
 import com.tecnotree.tools.Tn3FTP;
 import com.tecnotree.tools.Tn3GZIP;
 import com.tecnotree.tools.Tn3Logger;
@@ -45,6 +49,7 @@ public class PictureTotalFrozenBalancesPerDay {
 	private static GZIPOutputStream outGzip = null;
 		
 	private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static DateFormat dateFormatLog = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 	
 	private static String process="";
 	private static String date="";
@@ -259,12 +264,24 @@ public class PictureTotalFrozenBalancesPerDay {
 	 * Method sends the txt file to SFTP/FTP Server
 	 * 
 	 * @param absolutePathFile
+	 * @throws JsonProcessingException 
 	 */
-	private static void sendFtp(String ftp_ip, String ftp_port, String ftp_user, String ftp_pass, boolean ftp_sftp, String ftp_path, String file_name, String absolutePathFile) {
+	private static void sendFtp(String ftp_ip, String ftp_port, String ftp_user, String ftp_pass, boolean ftp_sftp, String ftp_path, String file_name, String absolutePathFile) throws JsonProcessingException {
 			
 		String gzipfileName = absolutePathFile;
 		String fileName = file_name;
+		
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.WRAP_ROOT_VALUE);
+		LogJson logJson = new LogJson();
+		logJson.setReport("PictureTotalFrozenBalancesPerDay");
+		logJson.setServer(ftp_ip);
+  		logJson.setPort(ftp_port);
+  		logJson.setFile(fileName);
+  		
 		if (ftp_sftp) {	
+			
+			logJson.setProtocol("sftp");
 			
 			System.out.println(dateFormat.format(new Date()) + " - Sending file " + gzipfileName + " via SFTP to directory " + ftp_path + " of server " + ftp_ip + ":" + ftp_port + "...");
 			logger.info("Sending file " + gzipfileName + " via SFTP to directory " + ftp_path + " of server " + ftp_ip + ":" + ftp_port + "...");	
@@ -275,26 +292,48 @@ public class PictureTotalFrozenBalancesPerDay {
     	   	if (!sftp.uploadFileToFTP(fileName, gzipfileName, false).isEmpty()) {
 	      		System.out.println(dateFormat.format(new Date()) + " - The file " + gzipfileName + " sent via SFTP correctly.");
 	      		logger.info("The file " + gzipfileName + " sent via SFTP correctly.");
-	      	
+	      		
+	      		logJson.setStatus("SUCCESS");
+	      		logJson.setCode("200");
+	      		logJson.setDateTime(dateFormatLog.format(new Date()));
+	      		
 	      	}else {
 	      		System.out.println(dateFormat.format(new Date()) + " - The file " + gzipfileName + " didn't send via SFTP correctly.");
 	      		logger.info("The file " + gzipfileName + " didn't send via SFTP correctly.");
+	      		
+	      		logJson.setStatus("FAILED");
+	      		logJson.setCode("500");
+	      		logJson.setDateTime(dateFormatLog.format(new Date()));
+	      		
 	      	}
 	      	
 		}else{
 	    	  
-			System.out.println(dateFormat.format(new Date()) + " - Sending file " + gzipfileName + " via FTP to " + ftp_ip + ":" + ftp_port + "...");
-			logger.info("Sending file " + gzipfileName + " via FTP to " + ftp_ip + ":" + ftp_port + "...");	
-				
+			logJson.setProtocol("ftp");
+			
+			System.out.println(dateFormat.format(new Date()) + " - Sending file " + gzipfileName + " via FTP to directory " + ftp_path + " of server " + ftp_ip + ":" + ftp_port + "...");
+			logger.info("Sending file " + gzipfileName + " via FTP to directory " + ftp_path + " of server " + ftp_ip + ":" + ftp_port + "...");	
+			
 	      	infoFtp = new String[] {ftp_ip,ftp_port,ftp_user,ftp_pass,gzipfileName};
 	      	if (Tn3FTP.upload(infoFtp, ftp_path)) {
 	      		System.out.println(dateFormat.format(new Date()) + " - The file " + gzipfileName + " sent via FTP correctly.");
 	      		logger.info("The file " + gzipfileName + " sent via FTP correctly.");
+	      		
+	      		logJson.setStatus("SUCCESS");
+	      		logJson.setCode("200");
+	      		logJson.setDateTime(dateFormatLog.format(new Date()));
+	      		
 	      	}else{
 	      		System.out.println(dateFormat.format(new Date()) + " - The file " + gzipfileName + " didn't send via FTP correctly.");
 	      		logger.info("The file " + gzipfileName + " didn't send via FTP correctly.");
+	      		
+	      		logJson.setStatus("FAILED");
+	      		logJson.setCode("500");
+	      		logJson.setDateTime(dateFormatLog.format(new Date()));
 	      	}
 		}
+		
+		logger.info(mapper.writeValueAsString(logJson));
 	}
   
 }

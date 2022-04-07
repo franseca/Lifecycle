@@ -31,8 +31,12 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.jcraft.jsch.JSchException;
 import com.opencsv.CSVWriter;
+import com.tecnotree.lifecycle.json.LogJson;
 import com.tecnotree.tools.Tn3ElasticSearch;
 import com.tecnotree.tools.Tn3File;
 import com.tecnotree.tools.Tn3Logger;
@@ -45,6 +49,7 @@ public class Logs {
 	
 	//VARIABLES
 	private static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static DateFormat dateFormatLog = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 	private static String bulk_ip = "", bulk_port = "", bulk_user = "", bulk_pass = "", bulk_path = "", bulk_id = "";
 	private static String log_outputDirectory = "";
 	private static boolean bulk_sftp = false;
@@ -147,6 +152,7 @@ public class Logs {
     			
     			//GENERO ARCHIVO CON LA DATA DE ELASTICSEARCH
     			generateCSVFile();
+    			//sendFile("prueba.csv"); //SEND A FILE TO THE BULK DIRECTLY
     			    			
     			System.out.println(dateFormat.format(new Date()) + " - Finished Logs process.");
     			logger.info("Finished Logs process.");
@@ -515,28 +521,50 @@ public class Logs {
 	 * @param ftp_sftp
 	 * @param fileName
 	 * @param absolutePathFile
+     * @throws JsonProcessingException 
 	 * 
 	 */
-	 private static void sendFtp(String ftp_ip, String ftp_port, String ftp_user, String ftp_pass, boolean ftp_sftp, String bulk_path, String fileName, String absolutePathFile) {
+	 private static void sendFtp(String ftp_ip, String ftp_port, String ftp_user, String ftp_pass, boolean ftp_sftp, String bulk_path, String fileName, String absolutePathFile) throws JsonProcessingException {
 		
+		//SET LOG PARA KPI'S
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.WRAP_ROOT_VALUE);
+		LogJson logJson = new LogJson();
+		logJson.setReport("Logs");
+		logJson.setServer(ftp_ip);
+  		logJson.setPort(ftp_port);
+  		logJson.setFile(fileName);
+	  		
 		if (ftp_sftp) {	
-			 
-			System.out.println(dateFormat.format(new Date()) + " - Sending file " + absolutePathFile + " via SFTP to " + ftp_ip + ":" + ftp_port + "...");
-			logger.info("Sending file " + absolutePathFile + " via SFTP to " + ftp_ip + ":" + ftp_port + "...");	
-						
+			
+			logJson.setProtocol("sftp");
+			
+			System.out.println(dateFormat.format(new Date()) + " - Sending file " + absolutePathFile + " via SFTP to directory " + bulk_path + " of server " + ftp_ip + ":" + ftp_port + "...");
+			logger.info("Sending file " + absolutePathFile + " via SFTP to directory " + bulk_path + " of server " + ftp_ip + ":" + ftp_port + "...");	
+			
 	      	Tn3SFTP sftp = new Tn3SFTP(ftp_ip, ftp_port, ftp_user, ftp_pass);
 	      	sftp.setDestinationDir(bulk_path);
 	      	
     	   	if (!sftp.uploadFileToFTP(fileName, absolutePathFile, false).isEmpty()) {
 	      		System.out.println(dateFormat.format(new Date()) + " - The file " + absolutePathFile + " sent via SFTP correctly.");
 	      		logger.info("The file " + absolutePathFile + " sent via SFTP correctly.");
-	      	
+	      		
+	      		logJson.setStatus("SUCCESS");
+	      		logJson.setCode("200");
+	      		logJson.setDateTime(dateFormatLog.format(new Date()));
+	      		
 	      	}else {
 	      		System.out.println(dateFormat.format(new Date()) + " - The file " + absolutePathFile + " didn't send via SFTP correctly.");
 	      		logger.info("The file " + absolutePathFile + " didn't send via SFTP correctly.");
+	      		
+	      		logJson.setStatus("FAILED");
+	      		logJson.setCode("500");
+	      		logJson.setDateTime(dateFormatLog.format(new Date()));
 	      	}
 	      	
 		}
+		
+		logger.info(mapper.writeValueAsString(logJson));
 	
 	 }
 	 
